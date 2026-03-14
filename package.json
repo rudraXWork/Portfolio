@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.99.1",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
+    "@vercel/analytics": "^2.0.1",
     "dotenv": "^16.6.1",
     "framer-motion": "^12.36.0",
     "langchain": "^1.2.32",
