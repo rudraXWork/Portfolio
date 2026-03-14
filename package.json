@@ -17,7 +17,7 @@
     "@supabase/supabase-js": "^2.99.1",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
-    "dotenv": "^17.3.1",
+    "dotenv": "^16.6.1",
     "framer-motion": "^12.36.0",
     "langchain": "^1.2.32",
     "lucide-react": "^0.577.0",

@@ -5,6 +5,11 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 
+type ConversationalInput = {
+  question: string;
+  conv_history?: string;
+};
+
 // Initialize Supabase client for LangChain
 const sbUrl = process.env.SUPABASE_URL_LC_CHATBOT!;
 const sbApiKey = process.env.SUPABASE_API_KEY!;
@@ -67,7 +72,7 @@ Be concise, professional, and friendly.`,
   ]);
 
   const retrieverChain = RunnableSequence.from([
-    (input: { question: string }) => input.question,
+    (input: ConversationalInput) => input.question,
     retriever,
     (docs) => docs.map((doc: any) => doc.pageContent).join("\n\n"),
   ]);
@@ -82,8 +87,8 @@ Be concise, professional, and friendly.`,
   const chain = RunnableSequence.from([
     {
       context: retrieverChain,
-      question: (input: { question: string }) => input.question,
-      conv_history: (input: { conv_history?: string }) => input.conv_history ?? "",
+      question: (input: ConversationalInput) => input.question,
+      conv_history: (input: ConversationalInput) => input.conv_history ?? "",
     },
     answerChain,
   ]);
