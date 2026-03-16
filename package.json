@@ -13,6 +13,7 @@
     "@langchain/community": "^1.1.23",
     "@langchain/core": "^1.1.32",
     "@langchain/google-genai": "^2.1.25",
+    "@langchain/groq": "^1.1.5",
     "@langchain/textsplitters": "^1.0.1",
     "@supabase/supabase-js": "^2.99.1",
     "@tsparticles/react": "^3.0.0",

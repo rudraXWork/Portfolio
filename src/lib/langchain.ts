@@ -1,9 +1,11 @@
-import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { ChatGroq } from "@langchain/groq";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { Document } from "@langchain/core/documents";
 
 type ConversationalInput = {
   question: string;
@@ -22,10 +24,10 @@ export const embeddings = new GoogleGenerativeAIEmbeddings({
 });
 
 // Chat model
-export const chatModel = new ChatGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_API_KEY,
-  model: "gemini-2.0-flash-lite",
-  maxOutputTokens: 512,
+export const chatModel = new ChatGroq({
+  apiKey: process.env.GROQ_API_KEY,
+  model: "llama-3.1-8b-instant",
+  maxTokens: 512,
   temperature: 0.5,
 });
 
@@ -74,7 +76,7 @@ Be concise, professional, and friendly.`,
   const retrieverChain = RunnableSequence.from([
     (input: ConversationalInput) => input.question,
     retriever,
-    (docs) => docs.map((doc: any) => doc.pageContent).join("\n\n"),
+    (docs: Document[]) => docs.map((doc) => doc.pageContent).join("\n\n"),
   ]);
 
   const answerChain = answerPrompt

@@ -4,7 +4,8 @@ This is a setup guide for the RAG (Retrieval-Augmented Generation) chatbot integ
 
 ## Prerequisites
 
-- Google API Key (for Gemini)
+- Google API Key (for Gemini embeddings)
+- Groq API Key (for chat model)
 - Supabase Project (for vector store)
 - Node.js and npm installed
 
@@ -16,7 +17,13 @@ This is a setup guide for the RAG (Retrieval-Augmented Generation) chatbot integ
 2. Click "Create API Key"
 3. Copy the key
 
-### 2. Set Up Supabase
+### 2. Get Groq API Key
+
+1. Go to [Groq Console](https://console.groq.com/keys)
+2. Create an API key
+3. Copy the key
+
+### 3. Set Up Supabase
 
 1. Go to [Supabase](https://supabase.com)
 2. Create a new project
@@ -26,14 +33,14 @@ This is a setup guide for the RAG (Retrieval-Augmented Generation) chatbot integ
 4. Go to **Settings** → **API** → **Service Role Key** to get:
    - `SUPABASE_SERVICE_ROLE_KEY`
 
-### 3. Set Up Database Tables
+### 4. Set Up Database Tables
 
 1. In Supabase, go to **SQL Editor**
 2. Create a new query
 3. Copy and paste the contents of `SUPABASE_SETUP.sql`
 4. Run the query
 
-### 4. Update Environment Variables
+### 5. Update Environment Variables
 
 Update `.env.local`:
 
@@ -41,13 +48,16 @@ Update `.env.local`:
 # Google Gemini
 GOOGLE_API_KEY=your_google_gemini_api_key_here
 
+# Groq
+GROQ_API_KEY=your_groq_api_key_here
+
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 ```
 
-### 5. Initialize Vector Store
+### 6. Initialize Vector Store
 
 Run this in your project to populate the vector store:
 
@@ -78,7 +88,7 @@ src/
 1. **User asks a question** via the chat widget
 2. **Frontend sends message** to `/api/chat`
 3. **Backend retrieves** relevant portfolio documents using vector similarity search
-4. **Gemini generates** a response based on the retrieved context
+4. **Groq generates** a response based on the retrieved context
 5. **Response is sent back** and displayed in the chat
 
 ## Customization
@@ -103,15 +113,15 @@ export const portfolioDocuments = [
 In `src/lib/langchain.ts`, change:
 
 ```typescript
-export const chatModel = new ChatGoogleGenerativeAI({
-  modelName: "gemini-pro", // Change model here
-  maxOutputTokens: 2048,
+export const chatModel = new ChatGroq({
+  model: "llama-3.1-8b-instant", // Change model here
+  maxTokens: 512,
 });
 ```
 
-Available models:
-- `gemini-pro` (faster)
-- `gemini-1.5-pro` (more capable)
+Available models (examples):
+- `llama-3.1-8b-instant` (fast)
+- `llama-3.3-70b-versatile` (more capable)
 
 ### Styling the Chat
 
