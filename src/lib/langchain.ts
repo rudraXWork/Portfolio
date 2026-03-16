@@ -12,29 +12,43 @@ type ConversationalInput = {
   conv_history?: string;
 };
 
-// Initialize Supabase client for LangChain
-const sbUrl = process.env.SUPABASE_URL_LC_CHATBOT!;
-const sbApiKey = process.env.SUPABASE_API_KEY!;
-const supabaseClient = createClient(sbUrl, sbApiKey);
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
 
-// Embeddings model
-export const embeddings = new GoogleGenerativeAIEmbeddings({
-  apiKey: process.env.GOOGLE_API_KEY,
-  model: "gemini-embedding-001",
-});
+function getSupabaseClient() {
+  const sbUrl = getRequiredEnv("SUPABASE_URL_LC_CHATBOT");
+  const sbApiKey = getRequiredEnv("SUPABASE_API_KEY");
+  return createClient(sbUrl, sbApiKey);
+}
 
-// Chat model
-export const chatModel = new ChatGroq({
-  apiKey: process.env.GROQ_API_KEY,
-  model: "llama-3.1-8b-instant",
-  maxTokens: 512,
-  temperature: 0.5,
-});
+function getEmbeddingsModel() {
+  return new GoogleGenerativeAIEmbeddings({
+    apiKey: getRequiredEnv("GOOGLE_API_KEY"),
+    model: "gemini-embedding-001",
+  });
+}
+
+function getChatModel() {
+  return new ChatGroq({
+    apiKey: getRequiredEnv("GROQ_API_KEY"),
+    model: "llama-3.1-8b-instant",
+    maxTokens: 512,
+    temperature: 0.5,
+  });
+}
 
 /**
  * Get vector store retriever
  */
 export async function getRetriever(k: number = 4) {
+  const embeddings = getEmbeddingsModel();
+  const supabaseClient = getSupabaseClient();
+
   const vectorStore = await SupabaseVectorStore.fromExistingIndex(
     embeddings,
     {
@@ -55,6 +69,7 @@ export async function getRetriever(k: number = 4) {
  */
 export async function createConversationalRAGChain() {
   const retriever = await getRetriever();
+  const chatModel = getChatModel();
 
   // Prompt to answer the question based on context and history
   const answerPrompt = ChatPromptTemplate.fromMessages([
