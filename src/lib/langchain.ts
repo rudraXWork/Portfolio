@@ -34,9 +34,11 @@ function getEmbeddingsModel() {
 }
 
 function getChatModel() {
+  const model = process.env.GROQ_MODEL ?? "llama-3.1-8b-instant";
+
   return new ChatGroq({
     apiKey: getRequiredEnv("GROQ_API_KEY"),
-    model: "llama-3.1-8b-instant",
+    model,
     maxTokens: 512,
     temperature: 0.5,
   });
