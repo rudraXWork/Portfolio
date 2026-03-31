@@ -20,9 +20,20 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+function getEnvFromList(names: string[]): string {
+  for (const name of names) {
+    const value = process.env[name];
+    if (value) {
+      return value;
+    }
+  }
+
+  throw new Error(`Missing required environment variable. Tried: ${names.join(", ")}`);
+}
+
 function getSupabaseClient() {
-  const sbUrl = getRequiredEnv("SUPABASE_URL_LC_CHATBOT");
-  const sbApiKey = getRequiredEnv("SUPABASE_API_KEY");
+  const sbUrl = getEnvFromList(["SUPABASE_URL_LC_CHATBOT", "NEXT_PUBLIC_SUPABASE_URL"]);
+  const sbApiKey = getEnvFromList(["SUPABASE_API_KEY", "SUPABASE_SERVICE_ROLE_KEY"]);
   return createClient(sbUrl, sbApiKey);
 }
 

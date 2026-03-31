@@ -40,9 +40,21 @@ function isQuotaExceededError(error: unknown): boolean {
   );
 }
 
+function isConfigurationError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const message = "message" in error ? String((error as { message?: string }).message ?? "") : "";
+  return message.toLowerCase().includes("missing required environment variable");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { message, messages } = await request.json();
+    const typedMessages = Array.isArray(messages)
+      ? (messages as Array<{ text?: string; sender?: string }>)
+      : [];
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -58,9 +70,9 @@ export async function POST(request: NextRequest) {
     // Format previous messages as conversation history string
     // This is simple formatting; you can adjust based on message structure
     const history = messages
-      ? messages
-          .filter((msg: any) => msg.text !== message) // Exclude current message if present
-          .map((msg: any) => `${msg.sender === "user" ? "Human" : "AI"}: ${msg.text}`)
+      ? typedMessages
+        .filter((msg) => msg.text !== message) // Exclude current message if present
+        .map((msg) => `${msg.sender === "user" ? "Human" : "AI"}: ${msg.text ?? ""}`)
           .join("\n")
       : "";
 
@@ -96,6 +108,18 @@ export async function POST(request: NextRequest) {
             retryHint,
         },
         { status: 429 }
+      );
+    }
+
+    if (isConfigurationError(error)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "configuration_error",
+          message:
+            "Server configuration is incomplete. Please verify GROQ_API_KEY, GOOGLE_API_KEY, and Supabase environment variables.",
+        },
+        { status: 500 }
       );
     }
 
